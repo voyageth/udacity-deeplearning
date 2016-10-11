@@ -97,3 +97,5 @@ notMNIST_small
 notMNIST_large.tar.gz
 notMNIST_small.tar.gz
 notMNIST.pickle
+
+5_word2vec/text8.zip
