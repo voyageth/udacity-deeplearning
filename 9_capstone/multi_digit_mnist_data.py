@@ -53,18 +53,18 @@ class MultiDigitMNISTData(object):
                 random_index = random.randrange(0, len(self.mnist.data))
                 self.multi_digit_mnist_data[i, j * 784:(j + 1) * 784] = self.mnist.data[random_index] / 255.0
                 self.multi_digit_mnist_target_digits[i, j] = self.mnist.target[random_index]
-        print(self.multi_digit_mnist_data.shape)  # (70000, 3920)
-        print(self.multi_digit_mnist_target_length.shape)  # (70000, 1)
-        print(self.multi_digit_mnist_target_digits.shape)  # (70000, 5)
+        print("multi_digit_mnist_data", self.multi_digit_mnist_data.shape)  # (70000, 3920)
+        print("multi_digit_mnist_target_length", self.multi_digit_mnist_target_length.shape)  # (70000, 1)
+        print("multi_digit_mnist_target_digits", self.multi_digit_mnist_target_digits.shape)  # (70000, 5)
 
         self.train_data = self.reformat_dataset(self.multi_digit_mnist_data[:self.train_data_count])
         self.train_label_length = self.reformat_target_length(
             self.multi_digit_mnist_target_length[:self.train_data_count])
         self.train_label_digits = self.reformat_target_digits(
             self.multi_digit_mnist_target_digits[:self.train_data_count])
-        print(self.train_data.shape)  # (49000, 140, 28, 1)
-        print(self.train_label_length.shape)  # (49000, 1, 6)
-        print(self.train_label_digits.shape)  # (49000, 5, 10)
+        print("train_data", self.train_data.shape)  # (49000, 140, 28, 1)
+        print("train_label_length", self.train_label_length.shape)  # (49000, 1, 6)
+        print("train_label_digits", self.train_label_digits.shape)  # (49000, 5, 10)
 
         self.validation_data = self.reformat_dataset(
             self.multi_digit_mnist_data[self.train_data_count:self.train_data_count + self.validation_data_count])
@@ -72,9 +72,9 @@ class MultiDigitMNISTData(object):
                                                                    self.train_data_count:self.train_data_count + self.validation_data_count])
         self.validation_label_digits = self.reformat_target_digits(self.multi_digit_mnist_target_digits[
                                                                    self.train_data_count:self.train_data_count + self.validation_data_count])
-        print(self.validation_data.shape)  # (14000, 140, 28, 1)
-        print(self.validation_label_length.shape)  # (14000, 1, 6)
-        print(self.validation_label_digits.shape)  # (14000, 5, 10)
+        print("validation_data", self.validation_data.shape)  # (14000, 140, 28, 1)
+        print("validation_label_length", self.validation_label_length.shape)  # (14000, 1, 6)
+        print("validation_label_digits", self.validation_label_digits.shape)  # (14000, 5, 10)
 
         self.test_data = self.reformat_dataset(
             self.multi_digit_mnist_data[self.train_data_count + self.validation_data_count:])
@@ -82,6 +82,6 @@ class MultiDigitMNISTData(object):
             self.multi_digit_mnist_target_length[self.train_data_count + self.validation_data_count:])
         self.test_label_digits = self.reformat_target_digits(
             self.multi_digit_mnist_target_digits[self.train_data_count + self.validation_data_count:])
-        print(self.test_data.shape)  # (7000, 140, 28, 1)
-        print(self.test_label_length.shape)  # (7000, 1, 6)
-        print(self.test_label_digits.shape)  # (7000, 5, 10)
+        print("test_data", self.test_data.shape)  # (7000, 140, 28, 1)
+        print("test_label_length", self.test_label_length.shape)  # (7000, 1, 6)
+        print("test_label_digits", self.test_label_digits.shape)  # (7000, 5, 10)
