@@ -14,10 +14,10 @@ from scipy.ndimage import gaussian_filter
 
 
 class MultiDigitSVHNData(object):
-    def __init__(self, digit_count=5, input_total_data_count=1, 
-                image_size=32, use_standard_score=False, add_margin=False, margin_ratio=0.1,
-                random_position_count=0, random_rotate_count=0, apply_gaussian_filter=False
-                ):
+    def __init__(self, digit_count=5, input_total_data_count=1,
+                 image_size=32, use_standard_score=False, add_margin=False, margin_ratio=0.1,
+                 random_position_count=0, random_rotate_count=0, apply_gaussian_filter=False
+                 ):
         random.seed(42)
         self.use_standard_score = use_standard_score
         self.add_margin = add_margin
@@ -28,7 +28,7 @@ class MultiDigitSVHNData(object):
         self.digit_count = digit_count
         self.image_width = image_size
         self.image_height = image_size
-        self.target_digit_num_labels = 10
+        self.target_digit_num_labels = 11
         self.num_channels = 3
 
         self.input_total_data_count = input_total_data_count
@@ -57,24 +57,24 @@ class MultiDigitSVHNData(object):
         gc.collect()
 
     @staticmethod
-    def maybe_pickle(digit_count, total_data_count, image_size=54, force=False, 
+    def maybe_pickle(digit_count, total_data_count, image_size=54, force=False,
                      use_standard_score=False, add_margin=False, margin_ratio=0.1,
-                     random_position_count=0, random_rotate_count=0, 
+                     random_position_count=0, random_rotate_count=0,
                      apply_gaussian_filter=False):
-        filename = 'svhn/reader/svhn_' + str(digit_count) \
-            + '_' + str(image_size) \
-            + '_' + str(total_data_count) \
-            + '_' + str(use_standard_score) \
-            + '_' + str(add_margin) \
-            + '_' + str(margin_ratio) \
-            + '_' + str(apply_gaussian_filter) \
-        
+        filename = 'svhn/reader/v2/svhn_' + str(digit_count) \
+                   + '_' + str(image_size) \
+                   + '_' + str(total_data_count) \
+                   + '_' + str(use_standard_score) \
+                   + '_' + str(add_margin) \
+                   + '_' + str(margin_ratio) \
+                   + '_' + str(apply_gaussian_filter) \
+
         if random_position_count > 0:
             filename += '_position' + str(random_position_count) \
-        
+
         if random_rotate_count > 0:
             filename += '_rotate' + str(random_rotate_count) \
-            
+
         filename += '.pickle'
 
         if os.path.exists(filename) and not force:
@@ -84,9 +84,9 @@ class MultiDigitSVHNData(object):
         else:
             print('Pickling %s.' % filename)
             svhn_data = MultiDigitSVHNData(digit_count=digit_count, input_total_data_count=total_data_count,
-                                            image_size=image_size, use_standard_score=use_standard_score, add_margin=add_margin,
-                                            random_position_count=random_position_count, random_rotate_count=random_rotate_count,
-                                            margin_ratio=margin_ratio, apply_gaussian_filter=apply_gaussian_filter)
+                                           image_size=image_size, use_standard_score=use_standard_score, add_margin=add_margin,
+                                           random_position_count=random_position_count, random_rotate_count=random_rotate_count,
+                                           margin_ratio=margin_ratio, apply_gaussian_filter=apply_gaussian_filter)
             svhn_data.load_data()
             try:
                 MultiDigitSVHNData.write_pickle(filename, svhn_data)
@@ -108,14 +108,14 @@ class MultiDigitSVHNData(object):
         return (np.arange(self.digit_count + 1) == target_length).astype(np.float32)
 
     def reformat_target_digits(self, target_digits):
-        return (np.arange(10) == target_digits).astype(np.float32)
-    
+        return (np.arange(11) == target_digits).astype(np.float32)
+
     def generate_data(self, rows, total_data_index, target_image_length, data_index, target_image,top,bottom,left,right,rotate_rand=False):
         self.total_label[total_data_index][0] = target_image_length
 
         for digit_index in range(0, target_image_length):
             self.total_label[total_data_index][1 + digit_index] = rows[1][data_index][digit_index][0]
-            
+
         rand_rotate_angle = 0
         if rotate_rand:
             if random.choice([True, False]):
@@ -129,7 +129,7 @@ class MultiDigitSVHNData(object):
                 std = np.std(target_image[:][:][channel_index], dtype='float32', ddof=1)
                 if std < 1e-4:std = 1
                 target_image[:][:][channel_index] = ((target_image[:][:][channel_index] - mean) / std).astype('uint8')
-            
+
             croped = target_image[channel_index][top:bottom, left:right]
             if rotate_rand:
                 croped = rotate(croped, rand_rotate_angle)
@@ -142,7 +142,7 @@ class MultiDigitSVHNData(object):
         if self.apply_gaussian_filter:
             self.total_data[total_data_index] = gaussian_filter(self.total_data[total_data_index], 1)
         total_data_index += 1
-        
+
         return total_data_index
 
     def load_data(self):
@@ -170,7 +170,7 @@ class MultiDigitSVHNData(object):
         self.update_data_counts()
 
         self.total_data = np.zeros((self.total_data_count, self.image_height, self.image_width, self.num_channels), dtype='uint8')
-        self.total_label = np.zeros((self.total_data_count, self.digit_count + 1), dtype=int)
+        self.total_label = np.ones((self.total_data_count, self.digit_count + 1), dtype=int) * 10
         print("total_data", self.total_data.shape)
         print("total_label", self.total_label.shape)
 
@@ -183,7 +183,7 @@ class MultiDigitSVHNData(object):
             bottom = int(np.max(rows[0][data_index] + rows[3][data_index]))
             left = int(np.min(rows[2][data_index]))
             right = int(np.max(rows[2][data_index] + rows[4][data_index]))
-            
+
             rand_max_width = 0
             rand_max_height = 0
 
@@ -209,36 +209,13 @@ class MultiDigitSVHNData(object):
                             rand_bottom = min(len(target_image[0]), bottom + rand_height)
                             rand_left = max(0, left + rand_width)
                             rand_right = min(len(target_image[0][0]), right + rand_width)
-                            
+
                             total_data_index = self.generate_data(rows,total_data_index,target_image_length,data_index,target_image,
                                                                   rand_top,rand_bottom,rand_left,rand_right)
                     if self.random_rotate_count > 0:
                         for rand_i in range(0, self.random_rotate_count):
                             total_data_index = self.generate_data(rows,total_data_index,target_image_length,data_index,target_image
                                                                   ,top,bottom,left,right, rotate_rand=True)
-                    
-#                 self.total_label[total_data_index][0] = target_image_length
-
-#                 for digit_index in range(0, target_image_length):
-#                     self.total_label[total_data_index][1 + digit_index] = rows[1][data_index][digit_index][0]
-                
-#                 for channel_index in range(0, self.num_channels):
-#                     if self.use_standard_score:
-#                         mean = np.mean(target_image[:][:][channel_index], dtype='float32')
-#                         std = np.std(target_image[:][:][channel_index], dtype='float32', ddof=1)
-#                         if std < 1e-4:std = 1
-#                         target_image[:][:][channel_index] = ((target_image[:][:][channel_index] - mean) / std).astype('uint8')
-                        
-#                     resized_image = resize(target_image[channel_index][top:bottom, left:right],
-#                                            output_shape=[self.image_width, self.image_height])
-#                     for image_height_index in range(0, self.image_height):
-#                         for image_width_index in range(0, self.image_width):
-#                             self.total_data[total_data_index][image_height_index][image_width_index][channel_index] = \
-#                                 resized_image[image_height_index][image_width_index] * 255
-
-#                 if self.apply_gaussian_filter:
-#                     self.total_data[total_data_index] = gaussian_filter(self.total_data[total_data_index], 1)
-#                 total_data_index += 1
 
         print("end : {}".format(time.strftime("%Y-%m-%dT%H:%M:%S%z")))
 
@@ -246,10 +223,10 @@ class MultiDigitSVHNData(object):
         self.train_label = self.total_label[:self.train_data_count]
         print("train_data", self.train_data.shape)
         print("train_label", self.train_label.shape)
-        
+
         self.validation_data = self.total_data[self.train_data_count:self.train_data_count + self.validation_data_count]
         self.validation_label = self.total_label[
-                                       self.train_data_count:self.train_data_count + self.validation_data_count]
+                                self.train_data_count:self.train_data_count + self.validation_data_count]
         print("validation_data", self.validation_data.shape)
         print("validation_label", self.validation_label.shape)
 
